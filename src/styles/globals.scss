@@ -1,0 +1,41 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --white: #fff;
+
+  --body: #d7d7d7;
+  --info: #bbbbbb;
+  --background: #1a1d23;
+  --heading: #f8f8f8;
+  --highlight: #ff57b2;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--white);
+}
+
+body,
+input,
+textarea,
+select,
+button {
+  font: 400 1.6rem "Inter", sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

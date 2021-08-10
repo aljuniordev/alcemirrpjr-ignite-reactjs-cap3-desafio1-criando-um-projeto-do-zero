@@ -1,0 +1,56 @@
+.contentContainer {
+  max-width: 700px;
+  margin: 2rem auto 6rem;
+
+  .posts {
+    a {
+      display: block;
+
+      // & + a {
+      margin-top: 4.8rem;
+      // }
+    }
+
+    button {
+      margin-top: 6.4rem;
+
+      border: none;
+      background: transparent;
+      font-size: 1.8rem;
+      font-weight: bold;
+      line-height: 2.17rem;
+      color: var(--highlight);
+    }
+  }
+
+  .title {
+    font-size: 2.8rem;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--body);
+  }
+
+  .info {
+    display: flex;
+    margin-top: 2rem;
+
+    .react_icons:nth-child(n + 2) {
+      padding-left: 1rem;
+    }
+
+    time,
+    span {
+      padding-left: 1rem;
+      font-size: 1.4rem;
+      font-weight: 400;
+      line-height: 1.69rem;
+      color: var(--info);
+    }
+  }
+}
