@@ -64,14 +64,6 @@ export default function Post({
     return <h1>Carregando...</h1>;
   }
 
-  // const totalWords = post.data.content.reduce((total, contentItem) => {
-  //   total += contentItem.heading.split(" ").length;
-
-  //   const words = contentItem.body.map(item => item.text.split(" ").length);
-  //   words.map(word => (total += word));
-  //   return total;
-  // }, 0);
-  // const readTime = Math.ceil(totalWords / 200);
   const readTime = `10`;
 
   const formatedDate = format(
