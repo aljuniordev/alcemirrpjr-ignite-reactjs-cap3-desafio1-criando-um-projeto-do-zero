@@ -1,19 +1,24 @@
 /* eslint-disable react/no-danger */
-import { GetStaticPaths, GetStaticProps } from "next";
-import { RichText } from "prismic-dom";
-import Head from "next/head";
-import { format } from "date-fns";
-import ptBR from "date-fns/locale/pt-BR";
-import { FaCalendar, FaUserAlt, FaClock } from "react-icons/fa";
-import Prismic from "@prismicio/client";
-
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
+import Link from "next/link";
+import { FaCalendar, FaUserAlt, FaClock } from "react-icons/fa";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+import { RichText } from "prismic-dom";
+import Prismic from "@prismicio/client";
 import { getPrismicClient } from "../../services/prismic";
 
+import Header from "../../components/Header";
+import Comments from "../../components/Comments";
+
 import styles from "./post.module.scss";
+import commonStyles from "../../styles/common.module.scss";
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -31,21 +36,70 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  preview: boolean;
+  navigation: {
+    prevPost: {
+      uid: string;
+      data: {
+        title: string;
+      };
+    }[];
+    nextPost: {
+      uid: string;
+      data: {
+        title: string;
+      };
+    }[];
+  };
 }
 
-export default function Post({ post }: PostProps): JSX.Element {
+export default function Post({
+  post,
+  preview,
+  navigation,
+}: PostProps): JSX.Element {
   const router = useRouter();
 
   if (router.isFallback) {
     return <h1>Carregando...</h1>;
   }
 
+  // const totalWords = post.data.content.reduce((total, contentItem) => {
+  //   total += contentItem.heading.split(" ").length;
+
+  //   const words = contentItem.body.map(item => item.text.split(" ").length);
+  //   words.map(word => (total += word));
+  //   return total;
+  // }, 0);
+  // const readTime = Math.ceil(totalWords / 200);
+  const readTime = `10`;
+
+  const formatedDate = format(
+    new Date(post.first_publication_date),
+    "dd MMM yyyy",
+    {
+      locale: ptBR,
+    }
+  );
+
+  const isPostEdited =
+    post.first_publication_date !== post.last_publication_date;
+
+  let editionDate;
+  if (isPostEdited) {
+    editionDate = format(
+      new Date(post.last_publication_date),
+      "'* editado em' dd MMM yyyy', as' H':'m",
+      {
+        locale: ptBR,
+      }
+    );
+  }
+
   return (
     <>
-      <Head>
-        <title>{post.data.title} | spacetraveling</title>
-      </Head>
-      <img src={post.data.banner.url} alt="logo" className={styles.banner} />
+      <Header />
+      <img src={post.data.banner.url} alt="imagem" className={styles.banner} />
       <main className={styles.container}>
         <div className={styles.post}>
           <div className={styles.postTop}>
@@ -53,18 +107,18 @@ export default function Post({ post }: PostProps): JSX.Element {
             <ul>
               <li>
                 <FaCalendar />
-                {format(new Date(post.first_publication_date), "dd MMM yyyy", {
-                  locale: ptBR,
-                })}
+                {formatedDate}
               </li>
               <li>
                 <FaUserAlt />
                 {post.data.author}
               </li>
               <li>
-                <FaClock />4 min
+                <FaClock />
+                {`${readTime} min`}
               </li>
             </ul>
+            <span>{isPostEdited && editionDate}</span>
           </div>
 
           {post.data.content.map(content => {
@@ -81,6 +135,36 @@ export default function Post({ post }: PostProps): JSX.Element {
             );
           })}
         </div>
+
+        <section className={`${styles.navigation} ${styles.container}`}>
+          {navigation?.prevPost.length > 0 && (
+            <div>
+              <h3>{navigation.prevPost[0].data.title}</h3>
+              <Link href={`/post/${navigation.prevPost[0].uid}`}>
+                <a>Post anterior</a>
+              </Link>
+            </div>
+          )}
+
+          {navigation?.nextPost.length > 0 && (
+            <div>
+              <h3>{navigation.nextPost[0].data.title}</h3>
+              <Link href={`/post/${navigation.nextPost[0].uid}`}>
+                <a>Próximo post</a>
+              </Link>
+            </div>
+          )}
+        </section>
+
+        <Comments />
+
+        {preview && (
+          <aside>
+            <Link href="/api/exit-preview">
+              <a className={commonStyles.preview}>Sair do modo Preview</a>
+            </Link>
+          </aside>
+        )}
       </main>
     </>
   );
@@ -106,24 +190,47 @@ export const getStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async context => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
+  const { slug } = params;
+  const response = await prismic.getByUID("posts", String(slug), {
+    ref: previewData?.ref || null,
+  });
 
-  const { slug } = context.params;
+  const prevPost = await prismic.query(
+    [Prismic.Predicates.at("document.type", "posts")],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: "[document.first_publication_date]",
+    }
+  );
 
-  const res = await prismic.getByUID(`posts`, String(slug), {});
+  const nextPost = await prismic.query(
+    [Prismic.Predicates.at("document.type", "posts")],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: "[document.last_publication_date desc]",
+    }
+  );
 
   const post = {
-    uid: res.uid,
-    first_publication_date: res.first_publication_date,
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
-      title: res.data.title,
-      subtitle: res.data.subtitle,
-      author: res.data.author,
+      title: response.data.title,
+      subtitle: response.data.subtitle,
+      author: response.data.author,
       banner: {
-        url: res.data.banner.url,
+        url: response.data.banner.url,
       },
-      content: res.data.content.map(content => {
+      content: response.data.content.map(content => {
         return {
           heading: content.heading,
           body: [...content.body],
@@ -135,6 +242,12 @@ export const getStaticProps: GetStaticProps = async context => {
   return {
     props: {
       post,
+      preview,
+      navigation: {
+        prevPost: prevPost?.results,
+        nextPost: nextPost?.results,
+      },
     },
+    revalidate: 1800,
   };
 };

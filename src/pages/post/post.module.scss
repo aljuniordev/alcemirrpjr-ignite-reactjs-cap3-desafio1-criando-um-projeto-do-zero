@@ -1,17 +1,17 @@
 .container {
   max-width: 700px;
-  margin: 2rem auto 6rem;
+  margin: 4rem auto;
 }
 
 .banner {
   width: 100%;
-  height: 20rem;
+  height: 25rem;
   object-fit: cover;
 }
 
 .post {
   h2 {
-    font-size: 2rem;
+    font-size: 2.25rem;
     color: var(--heading);
     margin: 3rem 0;
   }
@@ -20,9 +20,9 @@
   span,
   a,
   ul {
-    font-size: 1rem;
-    line-height: 1.8rem;
-    margin: 1rem 0;
+    font-size: 1.125rem;
+    line-height: 1.8;
+    margin: 1.8rem 0;
   }
 
   a {
@@ -44,6 +44,7 @@
 }
 
 .postTop {
+  margin-bottom: 4rem;
   > h1 {
     font-size: 3rem;
     color: var(--heading);
@@ -55,19 +56,53 @@
     margin: 0;
     list-style: none;
     display: flex;
-    margin-bottom: 4rem;
 
     & li {
       margin: 0;
-      font-size: 1rem;
+      font-size: 0.875rem;
 
       & svg {
         margin-right: 0.5rem;
       }
 
       & + li {
-        margin-left: 1.5rem;
+        margin-left: 1.625rem;
       }
     }
+  }
+
+  > span {
+    margin-top: 1rem;
+    display: block;
+    font-style: italic;
+    font-size: 0.875rem;
+    color: var(--info);
+  }
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: var(--heading);
+    margin-bottom: 0.5rem;
+  }
+
+  a {
+    color: var(--highlight);
+    font-weight: 600;
+  }
+
+  div {
+    padding-top: 3rem;
+  }
+
+  div + div {
+    text-align: right;
   }
 }
